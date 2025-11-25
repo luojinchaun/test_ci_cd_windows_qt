@@ -4,43 +4,25 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-env:
-  BUILD_TYPE: Release
-  BUILD_DIR: ${{ github.workspace }}/build
-
 jobs:
-  build:
-    runs-on: windows-latest
-	strategy:
-		matrix:
-			include:
-			  - qt_ver: 6.8.2
-				qt_arch: win64_msvc2022_64
-				msvc_arch: x64
-				qt_arch_install: win64_msvc2022_64
+  build_and_test:
+    name: "Build and test"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]  # 使用 GitHub 提供的 Linux 和 Windows 镜像构建
+    runs-on: ${{ matrix.os }}  # 根据矩阵选择运行系统
     steps:
-      # 安装Qt
-      - name: Install Qt
-        # 使用外部action。这个action专门用来安装Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          # Version of Qt to install
-          version: ${{ matrix.qt_ver }}
-          # Target platform for build
-          # target: ${{ matrix.qt_target }}
-          arch: ${{ matrix.qt_arch }}
-          cached: 'false'
-          aqtversion: '==2.0.5'          
-      # 拉取代码
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-		  
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-      
+    - name: Install dependencies (linux)
+      run: sudo apt install ninja-build
+      if: matrix.os == 'ubuntu-latest'  # 条件执行，仅在 Ubuntu 上运行
+    - name: Install Ninja (windows)
+      run: choco install ninja  # Windows 上安装 Ninja
+      if: matrix.os == 'windows-latest'
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.2'  # 安装指定版本的 Qt
+    - uses: ilammy/msvc-dev-cmd@v1  # Windows 下配置 MSVC 编译环境
+    - uses: actions/checkout@v3  # 拉取源代码
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
+      run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
