@@ -25,4 +25,4 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1  # Windows 下配置 MSVC 编译环境
     - uses: actions/checkout@v3  # 拉取源代码
     - name: Build
-      run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
+      run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Release
