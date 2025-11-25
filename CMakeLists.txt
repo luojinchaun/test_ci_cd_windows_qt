@@ -10,25 +10,18 @@ set(ORF_HEAD_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include")
 set(ORF_BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 set(ORF_COM_INSTALL_DIR "${ORF_INSTALL_DIR}/component")
 
-
-# 设置输出目录
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${ORF_BIN_INSTALL_DIR})
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${ORF_BIN_INSTALL_DIR})
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${ORF_BIN_INSTALL_DIR})
-
-# FILE(GLOB SRC_FILES src/*.h src/*.cpp)
 FILE(GLOB SRC_FILES main.cpp)
 
-# find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
-# set(LINK_LIBS ${LINK_LIBS}
-# 	Qt6::Core
-# 	Qt6::Gui
-# 	Qt6::Widgets
-# )
+find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
+set(LINK_LIBS ${LINK_LIBS}
+	Qt6::Core
+	Qt6::Gui
+	Qt6::Widgets
+)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-# target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${ORF_LIB_INSTALL_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${ORF_HEAD_INSTALL_DIR})
 
