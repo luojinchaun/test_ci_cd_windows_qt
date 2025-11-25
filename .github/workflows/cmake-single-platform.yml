@@ -7,26 +7,37 @@ on:
 env:
   BUILD_TYPE: Release
   BUILD_DIR: ${{ github.workspace }}/build
-  VS_VERSION: "Visual Studio 17 2022"
-  QT_VERSION: 6.8.2
 
 jobs:
   build:
     runs-on: windows-latest
+	strategy:
+		matrix:
+			include:
+			  - qt_ver: 6.8.2
+				qt_arch: win64_msvc2022_64
+				msvc_arch: x64
+				qt_arch_install: win64_msvc2022_64
+    steps:
+      # 安装Qt
+      - name: Install Qt
+        # 使用外部action。这个action专门用来安装Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          # Version of Qt to install
+          version: ${{ matrix.qt_ver }}
+          # Target platform for build
+          # target: ${{ matrix.qt_target }}
+          arch: ${{ matrix.qt_arch }}
+          cached: 'false'
+          aqtversion: '==2.0.5'          
+      # 拉取代码
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+		  
     steps:
     - uses: actions/checkout@v4
-
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2022_64'
-        modules: 'qt5compat qtcharts qtdatavis3d qtnetworkauth qtpurchasing qtremoteobjects qtscxml qtsensors qtserialbus qtserialport qtspeech qtvirtualkeyboard qtwebchannel qtwebengine qtwebsockets qtwebview'  # 根据需求添加模块
-        cache: true
-        cache-key-prefix: 'qt-cache-${{ env.QT_VERSION }}-'
-        
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
